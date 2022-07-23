@@ -1,0 +1,79 @@
+{% extends "base.html"%}
+<!DOCTYPE html>
+<html>
+<head>
+    {% block content %}
+    
+        <link rel = "stylesheet" href = "http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+        <script src = "http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <div id = "sample" style = "width:100%; height:100% ;position:absolute;"></div>
+    <script>
+var mapOptions = {
+        center: [8.545914952140611, 76.9062226799405],
+        zoom: 16
+        }
+        var map = new L.map('sample', mapOptions);
+        var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+        map.addLayer(layer);
+        googleStreets = L.tileLayer('http://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+}).addTo(map);
+var circle=L.circleMarker([8.545914952140611, 76.9062226799405]).setRadius(100).on('click',onclick).addTo(map);
+           
+function onclick(e){
+    var popup=L.popup();
+    popup
+        .setLatLng(e.latlng)
+        .setContent("you clicked on the region"+e.latlng)
+        .openOn(map)
+    $(document).ready(function(){
+        
+        var temp,hum,pressure,p_temp,moisture;
+                setInterval(function(){
+                    $.ajax({
+                        url: "{% url 'weather_details' %}",
+                        dataType: "json",
+                        success: function (data) {
+                            temp = data.obj.temp
+                            hum = data.obj.hum,
+                            pressure = data.obj.pressure;
+                            p_temp = data.obj.p_temp;
+                            moisture = data.obj.moisture;
+                          
+                            popup.setContent("weather-conditions<br>"+ "<br><br>Temperature: " + temp +"°C <br>Humidityt:" + hum + "%" + "<br>pressure:" + pressure + "hpa<br>Pressure_Temperature: " +p_temp +"<br>moisture: " +moisture );
+                            
+                            
+                        },
+
+
+
+                    });
+
+                },2000);
+    })
+        
+
+}
+map.on('click',function(e){
+    alert("you are out of area");
+    circle.closePopUp();
+    
+
+});
+        
+        // map.on('click',function(e){
+        //     alert(e.latlng)
+        // })
+
+    </script>
+    
+   
+...........
+</body>
+{% endblock%}
+</html>
